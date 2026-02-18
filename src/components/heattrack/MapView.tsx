@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import type { LatLng, RouteResult } from '@/types/heattrack';
 
@@ -21,11 +21,12 @@ interface MapViewProps {
   selectedHour: number;
   pickMode: boolean;
   focusPoint: LatLng | null;
+  focusZoom: number | null;
   onMapClick: (latlng: LatLng) => void;
 }
 
 export default function MapView({
-  origin, destination, route, heatLayerOn, selectedHour, pickMode, focusPoint, onMapClick,
+  origin, destination, route, heatLayerOn, selectedHour, pickMode, focusPoint, focusZoom, onMapClick,
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -139,8 +140,9 @@ export default function MapView({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !focusPoint) return;
-    map.setView([focusPoint.lat, focusPoint.lng], Math.max(map.getZoom(), 15), { animate: true });
-  }, [focusPoint]);
+    const nextZoom = focusZoom ?? Math.max(map.getZoom(), 15);
+    map.setView([focusPoint.lat, focusPoint.lng], nextZoom, { animate: true });
+  }, [focusPoint, focusZoom]);
   // Cursor style for pick mode
   useEffect(() => {
     const container = containerRef.current;

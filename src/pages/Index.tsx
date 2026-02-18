@@ -35,6 +35,8 @@ export default function Index() {
   const [pickMode, setPickMode] = useState(false);
   const [locateFailed, setLocateFailed] = useState(false);
   const [focusPoint, setFocusPoint] = useState<LatLng | null>(null);
+  const [focusZoom, setFocusZoom] = useState<number | null>(null);
+  const [selectedCityName, setSelectedCityName] = useState<string | null>(null);
   const [pickStep, setPickStep] = useState<'origin' | 'destination'>('origin');
 
   const formatCoord = (p: LatLng) => `${p.lng.toFixed(5)},${p.lat.toFixed(5)}`;
@@ -101,6 +103,7 @@ export default function Index() {
         setOriginText(formatCoord(p));
         setLocateFailed(false);
         setFocusPoint(p);
+        setFocusZoom(15);
         toast.success('已定位到当前位置', { id: loadingId });
       },
       () => {
@@ -129,6 +132,15 @@ export default function Index() {
     setInputCardCollapsed(false);
     setLocateFailed(false);
     setFocusPoint(null);
+    setFocusZoom(null);
+    setSelectedCityName(null);
+  }, []);
+
+  const handleSelectCity = useCallback((cityName: string, center: LatLng) => {
+    setSelectedCityName(cityName);
+    setFocusPoint(center);
+    setFocusZoom(11);
+    toast.success(`已切换到${cityName}`);
   }, []);
 
   const handlePickMode = useCallback(() => {
@@ -184,6 +196,7 @@ export default function Index() {
           selectedHour={selectedHour}
           pickMode={pickMode}
           focusPoint={focusPoint}
+          focusZoom={focusZoom}
           onMapClick={handleMapClick}
         />
       </div>
@@ -244,6 +257,8 @@ export default function Index() {
               onLocate={handleLocate}
               onLocateCurrent={handleLocate}
               locateFailed={locateFailed}
+              selectedCityName={selectedCityName}
+              onSelectCity={handleSelectCity}
               onSwap={handleSwap}
               onPlanRoute={handlePlanRoute}
               onPickMode={handlePickMode}
