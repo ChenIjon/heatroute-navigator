@@ -31,7 +31,10 @@ export default function Index() {
 
   // UI state
   const [drawerExpanded, setDrawerExpanded] = useState(false);
+  const [inputCardCollapsed, setInputCardCollapsed] = useState(false);
   const [pickMode, setPickMode] = useState(false);
+  const [locateFailed, setLocateFailed] = useState(false);
+  const [focusPoint, setFocusPoint] = useState<LatLng | null>(null);
   const [pickStep, setPickStep] = useState<'origin' | 'destination'>('origin');
 
   const formatCoord = (p: LatLng) => `${p.lng.toFixed(5)},${p.lat.toFixed(5)}`;
@@ -50,9 +53,11 @@ export default function Index() {
       setRoute(result);
       setMetrics(mockMetrics(result.distance, result.duration, selectedHour));
       setDrawerExpanded(true);
+      setInputCardCollapsed(true);
       toast.success('路线规划成功');
-    } catch (err: any) {
-      toast.error(err.message || '路线规划失败');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : '路线规划失败';
+      toast.error(message);
     } finally {
       setRouteLoading(false);
     }
@@ -83,17 +88,25 @@ export default function Index() {
 
   const handleLocate = useCallback(() => {
     if (!navigator.geolocation) {
+      setLocateFailed(true);
       toast.error('此设备不支持定位');
       return;
     }
+
+    const loadingId = toast.loading('正在请求定位权限...');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const p: LatLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setOrigin(p);
         setOriginText(formatCoord(p));
-        toast.success('已定位到当前位置');
+        setLocateFailed(false);
+        setFocusPoint(p);
+        toast.success('已定位到当前位置', { id: loadingId });
       },
-      () => toast.error('定位失败，请检查权限'),
+      () => {
+        setLocateFailed(true);
+        toast.error('定位失败，请检查权限', { id: loadingId });
+      },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   }, []);
@@ -113,9 +126,13 @@ export default function Index() {
     setRoute(null);
     setMetrics(null);
     setDrawerExpanded(false);
+    setInputCardCollapsed(false);
+    setLocateFailed(false);
+    setFocusPoint(null);
   }, []);
 
   const handlePickMode = useCallback(() => {
+    setInputCardCollapsed(false);
     setPickMode(true);
     setPickStep('origin');
   }, []);
@@ -166,6 +183,7 @@ export default function Index() {
           heatLayerOn={heatLayerOn}
           selectedHour={selectedHour}
           pickMode={pickMode}
+          focusPoint={focusPoint}
           onMapClick={handleMapClick}
         />
       </div>
@@ -224,12 +242,17 @@ export default function Index() {
               onOriginChange={setOriginText}
               onDestChange={setDestText}
               onLocate={handleLocate}
+              onLocateCurrent={handleLocate}
+              locateFailed={locateFailed}
               onSwap={handleSwap}
               onPlanRoute={handlePlanRoute}
               onPickMode={handlePickMode}
               onClear={handleClear}
+              onExpand={() => setInputCardCollapsed(false)}
+              onCollapse={() => setInputCardCollapsed(true)}
               loading={routeLoading}
               hasRoute={!!route}
+              collapsed={inputCardCollapsed}
             />
           </div>
 
