@@ -45,13 +45,14 @@ export default function InputCard({
   const [cityDialogOpen, setCityDialogOpen] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState<string>('');
   const [selectedCity, setSelectedCity] = useState<string>('');
+  const [cityConfirmLoading, setCityConfirmLoading] = useState(false);
 
   const availableCities = useMemo(() => {
     if (!selectedProvince) return [];
     return CHINA_PROVINCE_CITY_OPTIONS[selectedProvince] ?? [];
   }, [selectedProvince]);
 
-  const handleConfirmCity = () => {
+  const handleConfirmCity = async () => {
     if (!selectedProvince || !selectedCity) return;
     const city = (CHINA_PROVINCE_CITY_OPTIONS[selectedProvince] ?? []).find((item) => item.name === selectedCity);
     if (!city) return;
@@ -218,15 +219,15 @@ export default function InputCard({
               </SelectTrigger>
               <SelectContent>
                 {availableCities.map((city) => (
-                  <SelectItem key={city.name} value={city.name}>{city.name}</SelectItem>
+                  <SelectItem key={city} value={city}>{city}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
           <DialogFooter className="mt-1">
-            <Button className="h-9" onClick={handleConfirmCity} disabled={!selectedProvince || !selectedCity}>
-              确认城市
+            <Button className="h-9" onClick={handleConfirmCity} disabled={!selectedProvince || !selectedCity || cityConfirmLoading}>
+              {cityConfirmLoading ? '定位中…' : '确认城市'}
             </Button>
           </DialogFooter>
         </DialogContent>

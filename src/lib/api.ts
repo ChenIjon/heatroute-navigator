@@ -116,3 +116,28 @@ export function parseCoordInput(input: string): LatLng | null {
   }
   return null;
 }
+
+export async function geocodeChineseCity(province: string, city: string): Promise<LatLng> {
+  const buildUrl = (name: string) =>
+    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=8&language=zh&format=json`;
+
+  const candidates = [`${city} ${province}`, city];
+
+  for (const keyword of candidates) {
+    const res = await fetch(buildUrl(keyword));
+    if (!res.ok) continue;
+    const data = await res.json();
+    const results: Array<{ latitude: number; longitude: number; country_code?: string; admin1?: string; name?: string }> = data?.results ?? [];
+
+    const matched =
+      results.find((item) => item.country_code === 'CN' && (item.admin1?.includes(province.replace(/省|市|自治区|特别行政区/g, '')) || item.name?.includes(city.replace(/市|地区|盟|自治州|县/g, '')))) ??
+      results.find((item) => item.country_code === 'CN') ??
+      results[0];
+
+    if (matched && Number.isFinite(matched.latitude) && Number.isFinite(matched.longitude)) {
+      return { lat: matched.latitude, lng: matched.longitude };
+    }
+  }
+
+  throw new Error('城市定位失败');
+}
