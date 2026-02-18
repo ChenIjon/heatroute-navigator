@@ -20,11 +20,12 @@ interface MapViewProps {
   heatLayerOn: boolean;
   selectedHour: number;
   pickMode: boolean;
+  focusPoint: LatLng | null;
   onMapClick: (latlng: LatLng) => void;
 }
 
 export default function MapView({
-  origin, destination, route, heatLayerOn, selectedHour, pickMode, onMapClick,
+  origin, destination, route, heatLayerOn, selectedHour, pickMode, focusPoint, onMapClick,
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -128,10 +129,18 @@ export default function MapView({
       },
     });
 
-    heatLayerRef.current = new (HeatGrid as any)({ opacity: 1 });
+    const HeatGridCtor = HeatGrid as unknown as new (options?: L.GridLayerOptions) => L.GridLayer;
+    heatLayerRef.current = new HeatGridCtor({ opacity: 1 });
     heatLayerRef.current!.addTo(map);
   }, [heatLayerOn, selectedHour]);
 
+
+  // Focus map to a specific point (e.g. current location)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !focusPoint) return;
+    map.setView([focusPoint.lat, focusPoint.lng], Math.max(map.getZoom(), 15), { animate: true });
+  }, [focusPoint]);
   // Cursor style for pick mode
   useEffect(() => {
     const container = containerRef.current;
