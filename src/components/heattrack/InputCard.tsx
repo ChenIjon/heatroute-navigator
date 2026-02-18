@@ -11,8 +11,28 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CHINA_PROVINCE_CITY_OPTIONS, CHINA_PROVINCES } from '@/lib/chinaCities';
 import type { LatLng } from '@/types/heattrack';
+
+const CITY_OPTIONS: Record<string, { name: string; center: LatLng }[]> = {
+  北京市: [
+    { name: '北京市', center: { lat: 39.9042, lng: 116.4074 } },
+  ],
+  上海市: [
+    { name: '上海市', center: { lat: 31.2304, lng: 121.4737 } },
+  ],
+  广东省: [
+    { name: '广州市', center: { lat: 23.1291, lng: 113.2644 } },
+    { name: '深圳市', center: { lat: 22.5431, lng: 114.0579 } },
+  ],
+  浙江省: [
+    { name: '杭州市', center: { lat: 30.2741, lng: 120.1551 } },
+    { name: '宁波市', center: { lat: 29.8683, lng: 121.544 } },
+  ],
+  四川省: [
+    { name: '成都市', center: { lat: 30.5728, lng: 104.0668 } },
+    { name: '绵阳市', center: { lat: 31.4675, lng: 104.6796 } },
+  ],
+};
 
 interface Props {
   originText: string;
@@ -43,18 +63,17 @@ export default function InputCard({
 }: Props) {
   const canPlan = originText.trim().length > 0 && destText.trim().length > 0;
   const [cityDialogOpen, setCityDialogOpen] = useState(false);
-  const [selectedProvince, setSelectedProvince] = useState<string>('');
-  const [selectedCity, setSelectedCity] = useState<string>('');
-  const [cityConfirmLoading, setCityConfirmLoading] = useState(false);
+  const [selectedProvince, setSelectedProvince] = useState<string | undefined>(undefined);
+  const [selectedCity, setSelectedCity] = useState<string | undefined>(undefined);
 
   const availableCities = useMemo(() => {
     if (!selectedProvince) return [];
-    return CHINA_PROVINCE_CITY_OPTIONS[selectedProvince] ?? [];
+    return CITY_OPTIONS[selectedProvince] ?? [];
   }, [selectedProvince]);
 
-  const handleConfirmCity = async () => {
+  const handleConfirmCity = () => {
     if (!selectedProvince || !selectedCity) return;
-    const city = (CHINA_PROVINCE_CITY_OPTIONS[selectedProvince] ?? []).find((item) => item.name === selectedCity);
+    const city = (CITY_OPTIONS[selectedProvince] ?? []).find((item) => item.name === selectedCity);
     if (!city) return;
     onSelectCity(city.name, city.center);
     setCityDialogOpen(false);
@@ -200,14 +219,14 @@ export default function InputCard({
               value={selectedProvince}
               onValueChange={(value) => {
                 setSelectedProvince(value);
-                setSelectedCity('');
+                setSelectedCity(undefined);
               }}
             >
               <SelectTrigger className="h-9 text-sm">
                 <SelectValue placeholder="选择省份" />
               </SelectTrigger>
               <SelectContent>
-                {CHINA_PROVINCES.map((province) => (
+                {Object.keys(CITY_OPTIONS).map((province) => (
                   <SelectItem key={province} value={province}>{province}</SelectItem>
                 ))}
               </SelectContent>
@@ -219,15 +238,15 @@ export default function InputCard({
               </SelectTrigger>
               <SelectContent>
                 {availableCities.map((city) => (
-                  <SelectItem key={city} value={city}>{city}</SelectItem>
+                  <SelectItem key={city.name} value={city.name}>{city.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
           <DialogFooter className="mt-1">
-            <Button className="h-9" onClick={handleConfirmCity} disabled={!selectedProvince || !selectedCity || cityConfirmLoading}>
-              {cityConfirmLoading ? '定位中…' : '确认城市'}
+            <Button className="h-9" onClick={handleConfirmCity} disabled={!selectedProvince || !selectedCity}>
+              确认城市
             </Button>
           </DialogFooter>
         </DialogContent>

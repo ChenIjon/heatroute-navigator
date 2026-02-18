@@ -173,8 +173,6 @@ export default function Index() {
     setFocusPoint(null);
     setFocusZoom(null);
     setSelectedCityName(null);
-    setWeather(null);
-    setWeatherExpanded(false);
   }, []);
 
   const handleSelectCity = useCallback((cityName: string, center: LatLng) => {
