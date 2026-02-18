@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { ArrowLeft, RotateCcw, Check, LocateFixed, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,8 +7,9 @@ import InputCard from '@/components/heattrack/InputCard';
 import BottomPanel from '@/components/heattrack/BottomPanel';
 import UTCILegend from '@/components/heattrack/UTCILegend';
 import HourPicker from '@/components/heattrack/HourPicker';
-import { planRoute, fetchHeatSeries, mockMetrics, parseCoordInput } from '@/lib/api';
-import type { LatLng, RouteResult, RouteMetrics, HeatSeries } from '@/types/heattrack';
+import WeatherFloatingCard from '@/components/heattrack/WeatherFloatingCard';
+import { planRoute, fetchHeatSeries, mockMetrics, parseCoordInput, fetchTodayWeather, mockWeatherInfo } from '@/lib/api';
+import type { LatLng, RouteResult, RouteMetrics, HeatSeries, WeatherInfo } from '@/types/heattrack';
 
 export default function Index() {
   // Input state
@@ -28,6 +29,9 @@ export default function Index() {
   const [heatLoading, setHeatLoading] = useState(false);
   const [selectedHour, setSelectedHour] = useState(14);
   const [hourPickerOpen, setHourPickerOpen] = useState(false);
+  const [weather, setWeather] = useState<WeatherInfo | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [weatherExpanded, setWeatherExpanded] = useState(false);
 
   // UI state
   const [drawerExpanded, setDrawerExpanded] = useState(false);
@@ -38,6 +42,41 @@ export default function Index() {
   const [focusZoom, setFocusZoom] = useState<number | null>(null);
   const [selectedCityName, setSelectedCityName] = useState<string | null>(null);
   const [pickStep, setPickStep] = useState<'origin' | 'destination'>('origin');
+
+  const showWeatherCard = !!origin && !!destination && !pickMode;
+
+  useEffect(() => {
+    if (!showWeatherCard || !origin) {
+      setWeather(null);
+      setWeatherExpanded(false);
+      setWeatherLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const loadWeather = async () => {
+      setWeatherLoading(true);
+      try {
+        const data = await fetchTodayWeather(origin);
+        if (!cancelled) {
+          setWeather(data);
+        }
+      } catch {
+        if (!cancelled) {
+          setWeather(mockWeatherInfo());
+        }
+      } finally {
+        if (!cancelled) {
+          setWeatherLoading(false);
+        }
+      }
+    };
+
+    loadWeather();
+    return () => {
+      cancelled = true;
+    };
+  }, [showWeatherCard, origin]);
 
   const formatCoord = (p: LatLng) => `${p.lng.toFixed(5)},${p.lat.toFixed(5)}`;
 
@@ -278,6 +317,18 @@ export default function Index() {
               visible={heatLayerOn && !!heatSeries}
             />
           </div>
+
+          {/* Weather Floating Card */}
+          {showWeatherCard ? (
+            <div className="absolute left-3 bottom-72 z-10">
+              <WeatherFloatingCard
+                weather={weather}
+                loading={weatherLoading}
+                expanded={weatherExpanded}
+                onToggleExpand={() => setWeatherExpanded((v) => !v)}
+              />
+            </div>
+          ) : null}
 
           {/* Bottom Panel */}
           <div className="absolute bottom-0 left-0 right-0 z-10">

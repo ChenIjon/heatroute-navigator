@@ -26,3 +26,11 @@ export interface RouteMetrics {
   peakUTCI: number;
   avgUTCI: number;
 }
+
+export interface WeatherInfo {
+  weatherCode: number;
+  weatherLabel: string;
+  temperature: number;
+  humidity: number;
+  source: 'live' | 'mock';
+}
