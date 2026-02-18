@@ -1,4 +1,11 @@
-export const CHINA_PROVINCE_CITY_OPTIONS: Record<string, string[]> = {
+import type { LatLng } from '@/types/heattrack';
+
+export interface CityOption {
+  name: string;
+  center: LatLng;
+}
+
+const PROVINCE_CITY_NAMES: Record<string, string[]> = {
   北京市: ['北京市'],
   天津市: ['天津市'],
   上海市: ['上海市'],
@@ -34,5 +41,95 @@ export const CHINA_PROVINCE_CITY_OPTIONS: Record<string, string[]> = {
   澳门特别行政区: ['澳门半岛', '氹仔', '路环'],
   台湾省: ['台北市', '新北市', '桃园市', '台中市', '台南市', '高雄市', '基隆市', '新竹市', '嘉义市', '新竹县', '苗栗县', '彰化县', '南投县', '云林县', '嘉义县', '屏东县', '宜兰县', '花莲县', '台东县', '澎湖县', '金门县', '连江县'],
 };
+
+const PROVINCE_CENTER: Record<string, LatLng> = {
+  北京市: { lat: 39.9042, lng: 116.4074 },
+  天津市: { lat: 39.3434, lng: 117.3616 },
+  上海市: { lat: 31.2304, lng: 121.4737 },
+  重庆市: { lat: 29.563, lng: 106.5516 },
+  河北省: { lat: 38.0428, lng: 114.5149 },
+  山西省: { lat: 37.8706, lng: 112.5489 },
+  辽宁省: { lat: 41.8057, lng: 123.4315 },
+  吉林省: { lat: 43.8171, lng: 125.3235 },
+  黑龙江省: { lat: 45.8038, lng: 126.5349 },
+  江苏省: { lat: 32.0603, lng: 118.7969 },
+  浙江省: { lat: 30.2741, lng: 120.1551 },
+  安徽省: { lat: 31.8206, lng: 117.2272 },
+  福建省: { lat: 26.0745, lng: 119.2965 },
+  江西省: { lat: 28.682, lng: 115.8579 },
+  山东省: { lat: 36.6512, lng: 117.1201 },
+  河南省: { lat: 34.7466, lng: 113.6254 },
+  湖北省: { lat: 30.5928, lng: 114.3055 },
+  湖南省: { lat: 28.2282, lng: 112.9388 },
+  广东省: { lat: 23.1291, lng: 113.2644 },
+  海南省: { lat: 20.044, lng: 110.1983 },
+  四川省: { lat: 30.5728, lng: 104.0668 },
+  贵州省: { lat: 26.647, lng: 106.6302 },
+  云南省: { lat: 25.0438, lng: 102.7103 },
+  陕西省: { lat: 34.3416, lng: 108.9398 },
+  甘肃省: { lat: 36.0611, lng: 103.8343 },
+  青海省: { lat: 36.6171, lng: 101.7782 },
+  内蒙古自治区: { lat: 40.8426, lng: 111.7492 },
+  广西壮族自治区: { lat: 22.817, lng: 108.3669 },
+  西藏自治区: { lat: 29.6525, lng: 91.1721 },
+  宁夏回族自治区: { lat: 38.4872, lng: 106.2309 },
+  新疆维吾尔自治区: { lat: 43.8256, lng: 87.6168 },
+  香港特别行政区: { lat: 22.3193, lng: 114.1694 },
+  澳门特别行政区: { lat: 22.1987, lng: 113.5439 },
+  台湾省: { lat: 25.033, lng: 121.5654 },
+};
+
+const CITY_CENTER_OVERRIDE: Record<string, LatLng> = {
+  北京市: { lat: 39.9042, lng: 116.4074 },
+  天津市: { lat: 39.3434, lng: 117.3616 },
+  上海市: { lat: 31.2304, lng: 121.4737 },
+  重庆市: { lat: 29.563, lng: 106.5516 },
+  广州市: { lat: 23.1291, lng: 113.2644 },
+  深圳市: { lat: 22.5431, lng: 114.0579 },
+  杭州市: { lat: 30.2741, lng: 120.1551 },
+  宁波市: { lat: 29.8683, lng: 121.544 },
+  成都市: { lat: 30.5728, lng: 104.0668 },
+  武汉市: { lat: 30.5928, lng: 114.3055 },
+  西安市: { lat: 34.3416, lng: 108.9398 },
+  南京市: { lat: 32.0603, lng: 118.7969 },
+  苏州市: { lat: 31.2989, lng: 120.5853 },
+  青岛市: { lat: 36.0671, lng: 120.3826 },
+  厦门市: { lat: 24.4798, lng: 118.0894 },
+  长沙市: { lat: 28.2282, lng: 112.9388 },
+  郑州市: { lat: 34.7466, lng: 113.6254 },
+  昆明市: { lat: 25.0438, lng: 102.7103 },
+  拉萨市: { lat: 29.6525, lng: 91.1721 },
+  乌鲁木齐市: { lat: 43.8256, lng: 87.6168 },
+  香港岛: { lat: 22.276, lng: 114.165 },
+  九龙: { lat: 22.3167, lng: 114.1833 },
+  新界: { lat: 22.408, lng: 114.131 },
+  澳门半岛: { lat: 22.1987, lng: 113.5439 },
+  氹仔: { lat: 22.1566, lng: 113.5619 },
+  路环: { lat: 22.1167, lng: 113.559 },
+  台北市: { lat: 25.033, lng: 121.5654 },
+  高雄市: { lat: 22.6273, lng: 120.3014 },
+};
+
+function offsetByIndex(base: LatLng, idx: number): LatLng {
+  const ring = Math.floor(idx / 8) + 1;
+  const angle = (idx % 8) * (Math.PI / 4);
+  const latDelta = Math.sin(angle) * 0.45 * ring;
+  const lngDelta = Math.cos(angle) * 0.55 * ring;
+  return {
+    lat: +(base.lat + latDelta).toFixed(4),
+    lng: +(base.lng + lngDelta).toFixed(4),
+  };
+}
+
+export const CHINA_PROVINCE_CITY_OPTIONS: Record<string, CityOption[]> = Object.fromEntries(
+  Object.entries(PROVINCE_CITY_NAMES).map(([province, cities]) => {
+    const base = PROVINCE_CENTER[province] ?? { lat: 35, lng: 105 };
+    const options = cities.map((name, idx) => ({
+      name,
+      center: CITY_CENTER_OVERRIDE[name] ?? offsetByIndex(base, idx),
+    }));
+    return [province, options];
+  }),
+);
 
 export const CHINA_PROVINCES = Object.keys(CHINA_PROVINCE_CITY_OPTIONS);

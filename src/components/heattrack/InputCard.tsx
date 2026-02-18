@@ -11,8 +11,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
-import { geocodeChineseCity } from '@/lib/api';
 import { CHINA_PROVINCE_CITY_OPTIONS, CHINA_PROVINCES } from '@/lib/chinaCities';
 import type { LatLng } from '@/types/heattrack';
 
@@ -56,16 +54,10 @@ export default function InputCard({
 
   const handleConfirmCity = async () => {
     if (!selectedProvince || !selectedCity) return;
-    setCityConfirmLoading(true);
-    try {
-      const center = await geocodeChineseCity(selectedProvince, selectedCity);
-      onSelectCity(selectedCity, center);
-      setCityDialogOpen(false);
-    } catch {
-      toast.error('城市定位失败，请稍后重试或手动输入坐标');
-    } finally {
-      setCityConfirmLoading(false);
-    }
+    const city = (CHINA_PROVINCE_CITY_OPTIONS[selectedProvince] ?? []).find((item) => item.name === selectedCity);
+    if (!city) return;
+    onSelectCity(city.name, city.center);
+    setCityDialogOpen(false);
   };
 
   if (collapsed) {
