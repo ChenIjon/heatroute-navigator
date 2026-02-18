@@ -101,6 +101,28 @@ export default function InputCard({
     );
   }
 
+  if (collapsed) {
+    return (
+      <div className="glass-card rounded-2xl p-3 mx-3 mt-2">
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" className="h-9 text-sm flex-1" onClick={onPickMode}>
+            <Crosshair className="w-4 h-4 mr-1" />
+            重新选择
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 shrink-0 rounded-full"
+            onClick={onExpand}
+            title="展开卡片"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="glass-card rounded-2xl p-3 mx-3 mt-2 space-y-2">
