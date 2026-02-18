@@ -11,28 +11,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CHINA_PROVINCE_CITY_OPTIONS, CHINA_PROVINCES } from '@/lib/chinaCities';
 import type { LatLng } from '@/types/heattrack';
-
-const CITY_OPTIONS: Record<string, { name: string; center: LatLng }[]> = {
-  北京市: [
-    { name: '北京市', center: { lat: 39.9042, lng: 116.4074 } },
-  ],
-  上海市: [
-    { name: '上海市', center: { lat: 31.2304, lng: 121.4737 } },
-  ],
-  广东省: [
-    { name: '广州市', center: { lat: 23.1291, lng: 113.2644 } },
-    { name: '深圳市', center: { lat: 22.5431, lng: 114.0579 } },
-  ],
-  浙江省: [
-    { name: '杭州市', center: { lat: 30.2741, lng: 120.1551 } },
-    { name: '宁波市', center: { lat: 29.8683, lng: 121.544 } },
-  ],
-  四川省: [
-    { name: '成都市', center: { lat: 30.5728, lng: 104.0668 } },
-    { name: '绵阳市', center: { lat: 31.4675, lng: 104.6796 } },
-  ],
-};
 
 interface Props {
   originText: string;
@@ -68,38 +48,16 @@ export default function InputCard({
 
   const availableCities = useMemo(() => {
     if (!selectedProvince) return [];
-    return CITY_OPTIONS[selectedProvince] ?? [];
+    return CHINA_PROVINCE_CITY_OPTIONS[selectedProvince] ?? [];
   }, [selectedProvince]);
 
   const handleConfirmCity = () => {
     if (!selectedProvince || !selectedCity) return;
-    const city = (CITY_OPTIONS[selectedProvince] ?? []).find((item) => item.name === selectedCity);
+    const city = (CHINA_PROVINCE_CITY_OPTIONS[selectedProvince] ?? []).find((item) => item.name === selectedCity);
     if (!city) return;
     onSelectCity(city.name, city.center);
     setCityDialogOpen(false);
   };
-
-  if (collapsed) {
-    return (
-      <div className="glass-card rounded-2xl p-3 mx-3 mt-2">
-        <div className="flex items-center gap-2">
-          <Button variant="secondary" className="h-9 text-sm flex-1" onClick={onPickMode}>
-            <Crosshair className="w-4 h-4 mr-1" />
-            重新选择
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 shrink-0 rounded-full"
-            onClick={onExpand}
-            title="展开卡片"
-          >
-            <ChevronDown className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   if (collapsed) {
     return (
@@ -248,7 +206,7 @@ export default function InputCard({
                 <SelectValue placeholder="选择省份" />
               </SelectTrigger>
               <SelectContent>
-                {Object.keys(CITY_OPTIONS).map((province) => (
+                {CHINA_PROVINCES.map((province) => (
                   <SelectItem key={province} value={province}>{province}</SelectItem>
                 ))}
               </SelectContent>
